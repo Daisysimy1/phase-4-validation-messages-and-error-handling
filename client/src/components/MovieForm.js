@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styled from "styled-components";
 
-function MovieForm() {
-  const [formData, setFormData] = useState({
+function MovieForm(){
+  const [errors, setErrors] = useState({
     title: "",
     year: new Date().getFullYear(),
     length: "0",
@@ -22,10 +22,14 @@ function MovieForm() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((newMovie) => console.log(newMovie));
-  }
+    }).then((response) => {
+      if (response.ok) {
+        response.json().then((newMovie) => console.log(newMovie));
+      } else {
+        response.json().then((errorData) => setErrors(errorData.errors));
+      }
+      
+  });
 
   function handleChange(e) {
     const value =
@@ -39,7 +43,7 @@ function MovieForm() {
   return (
     <Wrapper>
       <form onSubmit={handleSubmit}>
-        <FormGroup>
+      <FormGroup>
           <label htmlFor="title">Title</label>
           <input
             type="text"
@@ -125,8 +129,18 @@ function MovieForm() {
             />
           </label>
         </FormGroup>
-        <SubmitButton type="submit">Add Movie</SubmitButton>
-      </form>
+  
+
+  {errors.length > 0 && (
+    <ul style={{ color: "red" }}>
+      {errors.map((error) => (
+        <li key={error}>{error}</li>
+      ))}
+    </ul>
+  )}
+  <SubmitButton type="submit">Add Movie</SubmitButton>
+</form>
+      
     </Wrapper>
   );
 }
@@ -152,6 +166,6 @@ const SubmitButton = styled.button`
   border: none;
   padding: 8px 16px;
   cursor: pointer;
-`;
+`;}
 
 export default MovieForm;
